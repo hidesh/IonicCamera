@@ -7,6 +7,7 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -33,10 +34,27 @@ export class AuthenticationService {
   SignIn(email: any, password: any) {
     return this.ngFireAuth.signInWithEmailAndPassword(email, password);
   }
-  // Register user with email/password
-  RegisterUser(email: any, password: any) {
-    return this.ngFireAuth.createUserWithEmailAndPassword(email, password);
-  }
+async RegisterUser(email: string, password: string) {
+    try {
+        const result = await this.ngFireAuth.createUserWithEmailAndPassword(email, password);
+        if (result && result.user) {
+            // Send verification email
+            await this.SendVerificationMail();
+
+            // Save user data to Firestore
+            const userData: User = {
+                uid: result.user.uid,
+                email: result.user.email || '',
+                displayName: result.user.displayName || '',
+                photoURL: result.user.photoURL || '',
+                emailVerified: result.user.emailVerified || false,
+            };
+            await this.afStore.collection('user').add(userData);
+        }
+    } catch (error) {
+        window.alert(error);
+    }
+}
   // Email verification when new user register
   SendVerificationMail() {
     return this.ngFireAuth.currentUser.then((user: any) => {
