@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "ionic-photo-292af": {
+      "hosting": {
+        "app": [
+          "ionic-photo-292af"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "ionic-photo-292af"
+  }
+}
