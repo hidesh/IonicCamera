@@ -1,0 +1,22 @@
+ion-button {
+    margin-top: 1rem;
+  }
+  
+  ion-item {
+    --ion-background-color: rgba(0, 0, 0, 0.04);
+  }
+  
+  ion-item::part(form-field) {
+    border-radius: 8px;
+  }
+  
+  .form-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+  }
+  form {
+    max-width: 400px;
+    width: 100%;
+    padding: 1rem;
+  }
