@@ -23,10 +23,8 @@ export class AuthGuard {
   ): boolean | UrlTree {
     const user = this.authService.checkLocalStorageUser();
     if (user) {
-      // User is authenticated, allow access to the route
       return true;
     } else {
-      // User is not authenticated, redirect to the login page
       return this.router.createUrlTree(['/']);
     }
   }

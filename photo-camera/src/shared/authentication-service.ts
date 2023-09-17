@@ -7,7 +7,7 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
-import { AngularFireStorage } from '@angular/fire/compat/storage'; 
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 @Injectable({
   providedIn: 'root',
@@ -34,27 +34,33 @@ export class AuthenticationService {
   SignIn(email: any, password: any) {
     return this.ngFireAuth.signInWithEmailAndPassword(email, password);
   }
-async RegisterUser(email: string, password: string) {
+  async RegisterUser(email: string, password: string) {
     try {
-        const result = await this.ngFireAuth.createUserWithEmailAndPassword(email, password);
-        if (result && result.user) {
-            // Send verification email
-            await this.SendVerificationMail();
+      const result = await this.ngFireAuth.createUserWithEmailAndPassword(
+        email,
+        password
+      );
+      if (result && result.user) {
+        // Send verification email
+        await this.SendVerificationMail();
 
-            // Save user data to Firestore
-            const userData: User = {
-                uid: result.user.uid,
-                email: result.user.email || '',
-                displayName: result.user.displayName || '',
-                photoURL: result.user.photoURL || '',
-                emailVerified: result.user.emailVerified || false,
-            };
-            await this.afStore.collection('user').doc(result.user.uid).set(userData);
-        }
+        // Save user data to Firestore
+        const userData: User = {
+          uid: result.user.uid,
+          email: result.user.email || '',
+          displayName: result.user.displayName || '',
+          photoURL: result.user.photoURL || '',
+          emailVerified: result.user.emailVerified || false,
+        };
+        await this.afStore
+          .collection('user')
+          .doc(result.user.uid)
+          .set(userData);
+      }
     } catch (error) {
-        window.alert(error);
+      window.alert(error);
     }
-}
+  }
   // Email verification when new user register
   SendVerificationMail() {
     return this.ngFireAuth.currentUser.then((user: any) => {
@@ -134,7 +140,7 @@ async RegisterUser(email: string, password: string) {
     return !!this.userData && !!this.userData.emailVerified;
   }
   getUserId() {
-    if(this.checkLocalStorageUser()){
+    if (this.checkLocalStorageUser()) {
       const user = this.checkLocalStorageUser();
       return user?.uid;
     }

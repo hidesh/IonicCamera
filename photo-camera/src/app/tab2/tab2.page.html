@@ -9,7 +9,6 @@
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Photo Gallery</ion-title>
-        
     </ion-toolbar>
   </ion-header>
   <ion-grid>
@@ -20,9 +19,9 @@
         size-lg="5"
         *ngFor="let photo of photos; index as position"
       >
-      <div class="photo-card">
-        <ion-img [src]="photo.photoUrl"></ion-img>
-      </div>
+        <div class="photo-card">
+          <ion-img [src]="photo.photoUrl"></ion-img>
+        </div>
       </ion-col>
     </ion-row>
   </ion-grid>

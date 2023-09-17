@@ -6,21 +6,23 @@
 
 <ion-content>
   <div class="form-container">
-  <form class="ion-padding">
-    <ion-item>
-      <ion-label position="floating">Email</ion-label>
-      <ion-input type="email" #email required></ion-input>
-    </ion-item>
+    <form class="ion-padding">
+      <ion-item>
+        <ion-label position="floating">Email</ion-label>
+        <ion-input type="email" #email required></ion-input>
+      </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Password</ion-label>
-      <ion-input type="password" #password required></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="floating">Password</ion-label>
+        <ion-input type="password" #password required></ion-input>
+      </ion-item>
 
-    <ion-button type="submit" (click)="logIn(email, password)" expand="block">Login</ion-button>
-  </form>
-</div>
-<div class="ion-text-center">
-  <a routerLink="/registration">Don't have an account? Register</a>
-</div>
+      <ion-button type="submit" (click)="logIn(email, password)" expand="block"
+        >Login</ion-button
+      >
+    </form>
+  </div>
+  <div class="ion-text-center">
+    <a routerLink="/registration">Don't have an account? Register</a>
+  </div>
 </ion-content>
