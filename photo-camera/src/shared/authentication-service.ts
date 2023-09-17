@@ -136,7 +136,6 @@ export class AuthenticationService {
   }
 
   isUserAuthenticated(): boolean {
-    console.log(this.userData);
     return !!this.userData && !!this.userData.emailVerified;
   }
   getUserId() {
