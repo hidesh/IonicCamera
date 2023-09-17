@@ -16,10 +16,10 @@
         size="12"
         size-md="6"
         size-lg="5"
-        *ngFor="let photo of photoService.photos; index as position"
+        *ngFor="let photo of photos; index as position"
       >
       <div class="photo-card">
-        <ion-img [src]="photo.webviewPath"></ion-img>
+        <ion-img [src]="photo"></ion-img>
       </div>
       </ion-col>
     </ion-row>

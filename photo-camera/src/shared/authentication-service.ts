@@ -49,7 +49,7 @@ async RegisterUser(email: string, password: string) {
                 photoURL: result.user.photoURL || '',
                 emailVerified: result.user.emailVerified || false,
             };
-            await this.afStore.collection('user').add(userData);
+            await this.afStore.collection('user').doc(result.user.uid).set(userData);
         }
     } catch (error) {
         window.alert(error);
