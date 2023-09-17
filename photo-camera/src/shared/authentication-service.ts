@@ -7,6 +7,7 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+import { AngularFireStorage } from '@angular/fire/compat/storage'; 
 
 @Injectable({
   providedIn: 'root',
@@ -14,19 +15,18 @@ import {
 export class AuthenticationService {
   userData: any;
   constructor(
+    public afStorage: AngularFireStorage,
     public afStore: AngularFirestore,
     public ngFireAuth: AngularFireAuth,
     public router: Router,
     public ngZone: NgZone
   ) {
-    this.ngFireAuth.authState.subscribe((user) => {
+    this.ngFireAuth.onAuthStateChanged((user) => {
       if (user) {
         this.userData = user;
         localStorage.setItem('user', JSON.stringify(this.userData));
-        JSON.parse(localStorage.getItem('user') || '{}');
       } else {
-        localStorage.setItem('user', null || '{}');
-        JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', '{}');
       }
     });
   }
@@ -121,11 +121,30 @@ async RegisterUser(email: string, password: string) {
       merge: true,
     });
   }
+  checkLocalStorageUser(): User | null {
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      return JSON.parse(userString);
+    }
+    return null;
+  }
+
+  isUserAuthenticated(): boolean {
+    console.log(this.userData);
+    return !!this.userData && !!this.userData.emailVerified;
+  }
+  getUserId() {
+    if(this.checkLocalStorageUser()){
+      const user = this.checkLocalStorageUser();
+      return user?.uid;
+    }
+    return this.userData?.uid || null;
+  }
   // Sign-out
   SignOut() {
     return this.ngFireAuth.signOut().then(() => {
       localStorage.removeItem('user');
-      this.router.navigate(['login']);
+      this.router.navigate(['/']);
     });
   }
 }

@@ -1,6 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title> Photo Gallery </ion-title>
+    <ion-title> Photo Gallery, Welcome {{email}} </ion-title>
+    <ion-button (click)="auth.SignOut()">Logout</ion-button>
   </ion-toolbar>
 </ion-header>
 
@@ -8,6 +9,7 @@
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Photo Gallery</ion-title>
+        
     </ion-toolbar>
   </ion-header>
   <ion-grid>
@@ -19,7 +21,7 @@
         *ngFor="let photo of photos; index as position"
       >
       <div class="photo-card">
-        <ion-img [src]="photo"></ion-img>
+        <ion-img [src]="photo.photoUrl"></ion-img>
       </div>
       </ion-col>
     </ion-row>

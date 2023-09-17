@@ -9,18 +9,32 @@ import { Observable, from } from 'rxjs';
 })
 export class Tab2Page implements OnInit {
   photos: any[] = []; // Array to store photos
-  constructor(public photoService: PhotoService) {}
+  email: string = '';
+  constructor(public photoService: PhotoService, public auth: AuthenticationService) {}
+  async getUserPhotos(userId: string){
+    try {
+      console.log(userId)
+        const userDocRef = this.auth.afStore.collection('user').doc(userId!).collection('photos').valueChanges().subscribe((data) => {
+          console.log(data)
+          this.photos = data
+          console.log(this.photos)
+        });
+        return userDocRef;
+    } catch (error) {
+      console.error('Error getting user photos:', error);
+      return null;
+    }
+  }
   async ngOnInit(){
     /* await this.photoService.loadSaved(); */
     try {
-      const userPhotosResponse = await this.photoService.getUserPhotos();
-
-      if (Array.isArray(userPhotosResponse)) {
-        this.photos = userPhotosResponse;
-        console.log(this.photos);
-      } else {
-        console.error('Invalid response:', userPhotosResponse);
-      }
+      this.auth.ngFireAuth.onAuthStateChanged((user) => {
+        if(user){
+          this.getUserPhotos(user.uid)
+          this.email = user.email!;
+          console.log(this.email)
+        }
+      })
     } catch (error) {
       console.error('Error getting user photos:', error);
     }

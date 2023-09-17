@@ -2,11 +2,13 @@ import {Injectable} from '@angular/core';
 import {Camera, CameraResultType, CameraSource, Photo} from '@capacitor/camera'
 import {Filesystem, Directory} from '@capacitor/filesystem'
 import {Preferences} from '@capacitor/preferences';
+import { Observable } from 'rxjs';
 import { AuthenticationService } from 'src/shared/authentication-service';
 
 @Injectable({providedIn: 'root'})
 export class PhotoService {
-    public photos : UserPhoto[] = [];
+    public photos : any[] = [];
+    userId: string | null = '';
     private PHOTO_STORAGE: string = 'photos';
     constructor(public auth: AuthenticationService) {}
     
@@ -49,17 +51,38 @@ export class PhotoService {
         const user = await this.auth.ngFireAuth.currentUser;
         const capturedPhoto = await Camera.getPhoto({resultType: CameraResultType.Uri, source: CameraSource.Camera, quality: 100});
         const savedImageFile = await this.savePicture(capturedPhoto);
-        console.log("imagefile",savedImageFile)
-        this.photos.unshift(savedImageFile)
-        Preferences.set({
-          key: this.PHOTO_STORAGE,
-          value: JSON.stringify(this.photos),
-         })
-        this.addPhotoToUserCollection(user!.uid,savedImageFile.base64)
+
+        const fileName = Date.now() + '.jpeg';
+        try {
+          const fileRef = this.auth.afStorage.ref(`user/${user!.uid}/${fileName}`);
+          await fileRef.putString(savedImageFile.base64, 'data_url');
+
+          const imageUrl = fileRef.getDownloadURL();
+          imageUrl.subscribe((url) => {
+            this.addImageUrlToUserCollection(user!.uid, url);
+          })
+
+          // Store the imageUrl in Firestore
+          this.photos.unshift(savedImageFile)
+          
+    } catch {
+      console.log("error")
+    }
+  }
+    async addImageUrlToUserCollection(userId: string, imageUrl: string) {
+      console.log(imageUrl)
+      try {
+        await this.auth.afStore.collection('user').doc(userId).collection('photos').add({
+          photoUrl: imageUrl,
+        });
+      } catch (error) {
+        console.error('Error adding image URL to Firestore:', error);
+      }
     }
 
     async addPhotoToUserCollection(userId: string, base64ImageData: string) {
         try {
+          console.log(userId)
           const userDocRef = this.auth.afStore.collection('user').doc(userId);
             await userDocRef.collection('photos').add({
               imageUrl: base64ImageData,
@@ -71,28 +94,15 @@ export class PhotoService {
         }
       }
 
-      async getUserPhotos() {
+      /* async getUserPhotos(userId: string){
         try {
-          const user = await this.auth.ngFireAuth.currentUser;
-          
-          if (user) {
-            const ret = this.auth.afStore
-              .collection(`user/${user.uid}/photos`)
-              .valueChanges();
-      
-            console.log(ret);
-            return ret;
-          } else {
-            console.error('User is not authenticated.');
-            // Handle the case where the user is not authenticated
-            return [];
-          }
+            const userDocRef = this.auth.afStore.collection('user').doc(userId!).collection('photos').valueChanges();
+            return userDocRef;
         } catch (error) {
           console.error('Error getting user photos:', error);
-          // Handle the error
           return null;
         }
-      }
+      } */
 
 
 }
