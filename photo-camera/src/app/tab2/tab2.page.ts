@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PhotoService } from '../services/photo.service';
 import { AuthenticationService } from 'src/shared/authentication-service';
+
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
@@ -9,6 +10,7 @@ import { AuthenticationService } from 'src/shared/authentication-service';
 export class Tab2Page implements OnInit {
   photos: any[] = [];
   email: string = '';
+
   constructor(
     public photoService: PhotoService,
     public auth: AuthenticationService
@@ -30,6 +32,7 @@ export class Tab2Page implements OnInit {
       return null;
     }
   }
+
   async ngOnInit() {
     try {
       this.auth.ngFireAuth.onAuthStateChanged((user) => {
@@ -45,5 +48,39 @@ export class Tab2Page implements OnInit {
 
   addPhotoToGallery() {
     this.photoService.addNewToGallery();
+  }
+
+  async deletePhoto(photoUrl: string) {
+    try {
+      // Find the photo in the photos array by its URL
+      const photoToDelete = this.photos.find((photo) => photo.photoUrl === photoUrl);
+
+      if (photoToDelete) {
+        // Get the ID of the Firestore document corresponding to the photo
+        const photoDocRef = await this.auth.afStore
+          .collection('user')
+          .doc(this.auth.userData.uid)
+          .collection('photos')
+          .ref.where('photoUrl', '==', photoToDelete.photoUrl)
+          .get();
+
+        if (!photoDocRef.empty) {
+          const docId = photoDocRef.docs[0].id;
+
+          // Delete the photo from Firestore using its ID
+          await this.auth.afStore
+            .collection('user')
+            .doc(this.auth.userData.uid)
+            .collection('photos')
+            .doc(docId)
+            .delete();
+
+          // Update the local photos array by removing the deleted photo
+          this.photos = this.photos.filter((photo) => photo.photoUrl !== photoUrl);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+    }
   }
 }

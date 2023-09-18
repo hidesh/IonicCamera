@@ -107,6 +107,21 @@ export class PhotoService {
       throw error;
     }
   }
+  async deletePhoto(userId: string, photoId: string) {
+    try {
+      await this.auth.afStore
+        .collection('user')
+        .doc(userId)
+        .collection('photos')
+        .doc(photoId)
+        .delete();
+
+      // If you want to delete the associated file from Firebase Storage, do it here
+      // Example: await this.afStorage.ref(`user/${userId}/${photoId}`).delete();
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+    }
+  }
 }
 
 export interface UserPhoto {

@@ -21,6 +21,7 @@
       >
         <div class="photo-card">
           <ion-img [src]="photo.photoUrl"></ion-img>
+          <ion-button (click)="deletePhoto(photo.photoUrl)">Delete</ion-button>
         </div>
       </ion-col>
     </ion-row>
