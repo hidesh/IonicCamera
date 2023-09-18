@@ -7,6 +7,7 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 @Injectable({
   providedIn: 'root',
@@ -14,19 +15,18 @@ import {
 export class AuthenticationService {
   userData: any;
   constructor(
+    public afStorage: AngularFireStorage,
     public afStore: AngularFirestore,
     public ngFireAuth: AngularFireAuth,
     public router: Router,
     public ngZone: NgZone
   ) {
-    this.ngFireAuth.authState.subscribe((user) => {
+    this.ngFireAuth.onAuthStateChanged((user) => {
       if (user) {
         this.userData = user;
         localStorage.setItem('user', JSON.stringify(this.userData));
-        JSON.parse(localStorage.getItem('user') || '{}');
       } else {
-        localStorage.setItem('user', null || '{}');
-        JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', '{}');
       }
     });
   }
@@ -34,27 +34,33 @@ export class AuthenticationService {
   SignIn(email: any, password: any) {
     return this.ngFireAuth.signInWithEmailAndPassword(email, password);
   }
-async RegisterUser(email: string, password: string) {
+  async RegisterUser(email: string, password: string) {
     try {
-        const result = await this.ngFireAuth.createUserWithEmailAndPassword(email, password);
-        if (result && result.user) {
-            // Send verification email
-            await this.SendVerificationMail();
+      const result = await this.ngFireAuth.createUserWithEmailAndPassword(
+        email,
+        password
+      );
+      if (result && result.user) {
+        // Send verification email
+        await this.SendVerificationMail();
 
-            // Save user data to Firestore
-            const userData: User = {
-                uid: result.user.uid,
-                email: result.user.email || '',
-                displayName: result.user.displayName || '',
-                photoURL: result.user.photoURL || '',
-                emailVerified: result.user.emailVerified || false,
-            };
-            await this.afStore.collection('user').add(userData);
-        }
+        // Save user data to Firestore
+        const userData: User = {
+          uid: result.user.uid,
+          email: result.user.email || '',
+          displayName: result.user.displayName || '',
+          photoURL: result.user.photoURL || '',
+          emailVerified: result.user.emailVerified || false,
+        };
+        await this.afStore
+          .collection('user')
+          .doc(result.user.uid)
+          .set(userData);
+      }
     } catch (error) {
-        window.alert(error);
+      window.alert(error);
     }
-}
+  }
   // Email verification when new user register
   SendVerificationMail() {
     return this.ngFireAuth.currentUser.then((user: any) => {
@@ -121,11 +127,29 @@ async RegisterUser(email: string, password: string) {
       merge: true,
     });
   }
+  checkLocalStorageUser(): User | null {
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      return JSON.parse(userString);
+    }
+    return null;
+  }
+
+  isUserAuthenticated(): boolean {
+    return !!this.userData && !!this.userData.emailVerified;
+  }
+  getUserId() {
+    if (this.checkLocalStorageUser()) {
+      const user = this.checkLocalStorageUser();
+      return user?.uid;
+    }
+    return this.userData?.uid || null;
+  }
   // Sign-out
   SignOut() {
     return this.ngFireAuth.signOut().then(() => {
       localStorage.removeItem('user');
-      this.router.navigate(['login']);
+      this.router.navigate(['/']);
     });
   }
 }

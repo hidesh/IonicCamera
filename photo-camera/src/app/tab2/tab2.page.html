@@ -1,6 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title> Photo Gallery </ion-title>
+    <ion-title> Photo Gallery, Welcome {{email}} </ion-title>
+    <ion-button (click)="auth.SignOut()">Logout</ion-button>
   </ion-toolbar>
 </ion-header>
 
@@ -13,10 +14,14 @@
   <ion-grid>
     <ion-row>
       <ion-col
-        size="3"
-        *ngFor="let photo of photoService.photos; index as position"
+        size="12"
+        size-md="6"
+        size-lg="5"
+        *ngFor="let photo of photos; index as position"
       >
-        <ion-img [src]="photo.webviewPath"></ion-img>
+        <div class="photo-card">
+          <ion-img [src]="photo.photoUrl"></ion-img>
+        </div>
       </ion-col>
     </ion-row>
   </ion-grid>
